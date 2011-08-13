@@ -165,6 +165,8 @@ en:
         boot_mode_invalid: "Boot mode must be one of: vrdp or gui"
         box_missing: "A box must be specified."
         box_not_found: "The box '%{name}' could not be found."
+        bridge_interface_not_specified: |-
+          A host network interface to bridge to must be specified when using bridged networking
         network_ip_invalid: "The host only network IP '%{ip}' is invalid."
         network_ip_ends_one: |-
           The host only network IP '%{ip}' must not end in a 1, as this

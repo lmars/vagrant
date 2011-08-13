@@ -123,12 +123,16 @@ module Vagrant
         network_options.each do |options|
           next if !options
 
+          if options[:mode] == :bridged && !options[:bridged_interface]
+            errors.add(I18n.t("vagrant.config.vm.bridge_interface_not_specified"))
+          end
+
           ip = options[:ip].split(".")
 
           if ip.length != 4
             errors.add(I18n.t("vagrant.config.vm.network_ip_invalid",
                               :ip => options[:ip]))
-          elsif ip.last == "1"
+          elsif ip.last == "1" && options[:mode] != :bridged
             errors.add(I18n.t("vagrant.config.vm.network_ip_ends_one",
                               :ip => options[:ip]))
           end

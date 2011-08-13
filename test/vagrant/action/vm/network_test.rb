@@ -121,7 +121,8 @@ class NetworkVMActionTest < Test::Unit::TestCase
       def expect_adapter_setup(options=nil)
         options = {
           :ip => "foo",
-          :adapter => 7
+          :adapter => 7,
+          :mode => :host_only
         }.merge(options || {})
 
         @env["config"].vm.network(options[:ip], options)
@@ -130,8 +131,12 @@ class NetworkVMActionTest < Test::Unit::TestCase
         @env["vm"].vm.network_adapters[options[:adapter]] = adapter = mock("adapter")
 
         adapter.expects(:enabled=).with(true)
-        adapter.expects(:attachment_type=).with(:host_only).once
-        adapter.expects(:host_only_interface=).with(@network_name).once
+        adapter.expects(:attachment_type=).with(options[:mode]).once
+        if options[:mode] == :host_only
+          adapter.expects(:host_only_interface=).with(@network_name).once
+        elsif options[:mode] == :bridged
+          adapter.expects(:bridged_interface=).with(options[:bridged_interface])
+        end
 
         if options[:mac]
           adapter.expects(:mac_address=).with(options[:mac].gsub(':', '')).once
@@ -154,6 +159,11 @@ class NetworkVMActionTest < Test::Unit::TestCase
 
       should "properly remove : from mac address" do
         expect_adapter_setup(:mac => "foo:bar")
+        @instance.assign_network
+      end
+
+      should "setup the specified network as bridged if specified" do
+        expect_adapter_setup(:mode => :bridged, :bridged_interface => 'foo')
         @instance.assign_network
       end
     end

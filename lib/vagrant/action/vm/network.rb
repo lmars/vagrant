@@ -68,10 +68,15 @@ module Vagrant
           @env.ui.info I18n.t("vagrant.actions.vm.network.preparing")
 
           @env.env.config.vm.network_options.compact.each do |network_options|
+            mode = network_options[:mode] || :host_only
             adapter = @env["vm"].vm.network_adapters[network_options[:adapter]]
             adapter.enabled = true
-            adapter.attachment_type = :host_only
-            adapter.host_only_interface = network_name(network_options)
+            adapter.attachment_type = mode
+            if mode == :host_only
+              adapter.host_only_interface = network_name(network_options)
+            elsif mode == :bridged
+              adapter.bridged_interface = network_options[:bridged_interface]
+            end
             adapter.mac_address = network_options[:mac].gsub(':', '') if network_options[:mac]
             adapter.save
           end
